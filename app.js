@@ -1,14 +1,15 @@
 const express = require('express');//express library import
 const bodyParser = require('body-parser');//body-parser import, JSON 형식의 body를 파싱하는데 사용
+const cors = require('cors');//cors import, 서버와 클라이언트 간의 통신을 가능하게 하는 미들웨어
 
 const app = express();//express 객체 생성
 const PORT = 3000; //개인 포트를 3000으로 설정
 
 // Middleware to parse JSON bodies
-const cors = require('cors');
+//const cors = require('cors');
 app.use(cors());
 
-// Mock "database" for storing user information
+// Mock "database" for storing usser information
 let users = [];
 
 // Route to handle user sign-up
