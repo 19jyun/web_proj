@@ -45,12 +45,14 @@ app.get('/upload', (req, res) => {
 
 //회원가입 정보 저장
 app.post('/signupinfo', (req, res) => {
+    const id = req.body.id;
     const name = req.body.name;
     const password = req.body.password;
     const studentnum = req.body.studentnum;
     const identity = req.body.identity;
 
-    var sql = `INSERT INTO signin (name, password, studentnum, identity) VALUES ('${name}', '${password}', '${studentnum}', '${identity}')`;
+    //멤버 테이블에 회원가입 데이터 저장
+    var sql = `INSERT INTO members (id, name, password, studentnum, identity) VALUES ('${id}', '${name}', '${password}', '${studentnum}', '${identity}')`;
 
     connection.query(sql, function (error, results) {
         if (error) {
@@ -62,8 +64,35 @@ app.post('/signupinfo', (req, res) => {
             res.send("<script>alert('회원가입이 성공적으로 되었습니다.'); location.href='/login';</script>");
         }
     });
-
 })
+
+
+app.post('/logininfo', (req, res) => {
+    const id = req.body.id;
+    const password = req.body.password;
+
+    //멤버 테이블에 회원가입 데이터 저장
+    var sql = `select * from members where id = '${id}' and password = '${password}'`;
+
+    var values = [id, password];
+
+    connection.query(sql, values, function (error, result) {
+        if (error) {
+            console.log(error);
+        }
+        else{
+            //console.log(result.length);//결과가 없으면 0, 있으면 1
+
+            if(result.length == 0){
+                res.send("<script>alert('아이디 또는 비밀번호가 틀렸습니다.'); location.href='/login';</script>");
+            }
+            else{
+                res.send("<script>alert('로그인 성공'); location.href='/';</script>");//로그인 성공 부분은 없애도 될듯
+            }
+        }
+    });
+})
+
 
 app.get('/test', (req, res) => {
     res.send('<h1>test</h1>');
