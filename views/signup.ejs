@@ -3,16 +3,84 @@
 <form action="/signupinfo" method="post">
 
     <li>회원가입</li>
-        <li>ID: <input type="text" name="id"> </input></li>
-        <li>이름: <input type="text" name="name"> </input></li>
-        <li>비밀번호: <input type="password" name="password"> </input></li> <!--나주엥 rich text로 수정 예정-->
-        <li>재확인: <input type="password" name="confirm_password"></input></li>
-        <li>학번: <input type="number" name="studentnum"></input></li>
+        <li>ID: <input type="text" name="id" id="id" required> </input></li>
+            <button type="button" id="checkIdButton">중복확인</button> <!--아이디 중복 확인 버튼-->
+        <li>이름: <input type="text" name="name" required> </input></li>
+
+        <li>비밀번호: <input type="password" name="password" required> </input></li> <!--나주엥 rich text로 수정 예정-->
+        <li>재확인: <input type="password" name="confirm_password" required></input></li>
+
+        <p name = "checking"></p>
+
+        <li>학번: <input type="number" name="studentnum" required></input></li>
         <li>신분: </li>
             <input type="radio" name="identity" value="student" required> 학생
             <input type="radio" name="identity" value="teacher" required>  교수자
 
-    <button type="submit">회원 가입</button>
+    <button type="submit" id="submitButton" disabled>회원 가입</button> <!--회원가입 버튼-->
 </form>
+
+<script> //upon click, 중복확인 실시
+
+    let checkedid = false;
+    let checkedpw = false;
+
+
+    document.getElementById('checkIdButton').addEventListener('click', function() {
+
+        const id = document.getElementById('id').value;
+
+        fetch('/checkid', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: id }),
+        })
+
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            if(data == "사용 가능한 아이디입니다.") {
+                document.getElementById('id').readOnly = true; //수정 불가능하게 바꾸기
+                checkedid = true;
+
+                if(checkedid && checkedpw) {//비밀번호도 일치하다는 가정하에
+                    document.getElementById('submitButton').disabled = false;
+                }
+            }
+            else{//아이디가 중복되는 경우
+                document.getElementById('id').value = "";
+                document.getElementById('submitButton').disabled = true;
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+
+    document.getElementsByName('password')[0].addEventListener('input', checkPasswordMatch);
+    document.getElementsByName('confirm_password')[0].addEventListener('input', checkPasswordMatch);
+
+    function checkPasswordMatch() {//타이핑 할때마다 비밀번호 일치하는지 확인
+
+        const password = document.getElementsByName('password')[0].value;
+        const confirmPassword = document.getElementsByName('confirm_password')[0].value;
+
+        if (password == confirmPassword) {
+            document.querySelector('p[name="checking"]').textContent = "일치";
+            checkedpw = true;
+            if(checkedid && checkedpw) {//비밀번호도 일치하다는 가정하에
+                    document.getElementById('submitButton').disabled = false;
+            }
+        } else {
+            // Passwords do not match
+            checkedpw = false;
+            document.querySelector('p[name="checking"]').textContent = "비밀번호가 다릅니다. 다시 입력해주세요.";
+            document.getElementById('submitButton').disabled = true;
+        }
+    }
+
+</script>
 
 <%- include('footer') %>

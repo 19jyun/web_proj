@@ -1,0 +1,16 @@
+<%- include('header.ejs') %>
+
+    <h2>새 강의</h2>
+
+
+    <form action="/lectureinfo" method="post">
+
+        <li>회원가입</li>
+            <li>Lecture ID(EX: COSE461-00): <input type="text" name="lecture_id"> </input></li>
+            <li>강의 이름: <input type="text" name="lecture_name"> </input></li>
+    
+        <button type="submit">강의 개설</button>
+    </form>
+
+<%- include('footer.ejs') %>
+```
