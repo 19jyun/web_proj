@@ -147,10 +147,11 @@ app.post('/checkid', (req, res) => {
 app.post('/lectureinfo', (req, res) => {
     const lecture_id = req.body.lecture_id;
     const lecture_name = req.body.lecture_name;
-    const professor_id = req.body.professor_id;
+    const professor_id = req.session.user.id;//이 정도는 현재 로그인 세션을 통해 저장
+    const max_num = req.body.max_num;
 
     //강의 테이블에 강의개설 데이터 저장
-    var sql = `INSERT INTO lectures (lecture_id, lecture_namek professor_id) VALUES ('${lecture_id}', '${lecture_name}', '${professor_id}')`;
+    var sql = `INSERT INTO lectures (lecture_id, lecture_name, professor_id, max_num, cur_num) VALUES ('${lecture_id}', '${lecture_name}', '${professor_id}', '${max_num}', 0)`;
 
     connection.query(sql, function (error, results) {
         if (error) {
@@ -210,6 +211,7 @@ app.post('/logininfo', (req, res) => {
                     if (results) {
                         // Passwords match
                         console.log('로그인 성공');
+                        console.log(result[0]);
                         
                         if(result[0].identity == 'teacher'){//교수자면 그에 해당하는 페이지로 이동
                             res.send("<script>alert('로그인 되었습니다.'); location.href='/professors';</script>");

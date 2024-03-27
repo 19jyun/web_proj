@@ -7,4 +7,14 @@
         <li>본문: <input type="text" name="maintext"> </input></li> <!--나주엥 rich text로 수정 예정-->
 
     </ul>
+
+    <form action="/announcementinfo" method="post">
+
+        <li>게시물 작성</li>
+            <li>제목: <input type="text" name="title"> </input></li>
+            <li>본문: <input type="text" name="maintext"> </input></li> <!--나주엥 rich text로 수정 예정-->
+    
+        <button type="submit" id="submitButton" >업로드</button> <!--회원가입 버튼-->
+    </form>
+
 <%- include ('footer') %>
