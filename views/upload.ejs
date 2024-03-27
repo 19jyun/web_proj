@@ -1,20 +1,20 @@
 <%- include ('header') %>
 
-"
-    <ul>
-        <li>게시물 작성</li>
+<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+
+<form action="/announcementinfo" method="post">
+
+    <input type="hidden" name="lecture_id" value="<%= lecture_id %>"></input>
+
+    <li>게시물 작성</li>
         <li>제목: <input type="text" name="title"> </input></li>
-        <li>본문: <input type="text" name="maintext"> </input></li> <!--나주엥 rich text로 수정 예정-->
+        <li>본문: <textarea id="maintext" name="maintext"></textarea></li> <!-- 수정된 부분 -->
 
-    </ul>
+        <button type="submit">업로드</button> <!--버튼 누르면 해당 lecture의 id를 가지고 함꼐 업로드 실행-->
+</form>
 
-    <form action="/announcementinfo" method="post">
-
-        <li>게시물 작성</li>
-            <li>제목: <input type="text" name="title"> </input></li>
-            <li>본문: <input type="text" name="maintext"> </input></li> <!--나주엥 rich text로 수정 예정-->
-    
-        <button type="submit" id="submitButton" >업로드</button> <!--회원가입 버튼-->
-    </form>
+<script>
+    CKEDITOR.replace( 'maintext' );
+</script>
 
 <%- include ('footer') %>

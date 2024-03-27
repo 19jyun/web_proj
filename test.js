@@ -59,12 +59,33 @@ app.get('/signup', (req, res) => {
     res.render('signup');
 });
 
-app.get('/upload', (req, res) => {
-    res.render('upload');
-})
+// app.get('/upload', (req, res) => {
+//     const lecture_id = req.query.lecture_id;
+//     res.render('upload', { lecture_id: lecture_id });
+// });
+app.get('/upload/:lecture_id', (req, res) => {
+    const lecture_id = req.params.lecture_id;
+    res.render('upload', { lecture_id: lecture_id });
+});
+
 
 app.get('/professors', (req, res) => {
-    res.render('professors');
+    const professor_id = req.session.user.id; // 세션에서 교수 ID 가져오기
+
+    console.log(professor_id);
+
+    // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
+    var sql = `SELECT * FROM lectures WHERE professor_id = '${professor_id}'`;
+
+    connection.query(sql, function (error, lectures) {
+        if (error) {
+            console.log(error);
+        }
+        else{
+            // EJS 템플릿에 강의 데이터를 전달합니다.
+            res.render('professors', { lectures: lectures });
+        }
+    });
 })
 
 app.get('/create_lecture', (req, res) => {
@@ -143,7 +164,7 @@ app.post('/checkid', (req, res) => {
     });
 });
 
-//강의개설 정보 저장
+//강의개설 정보 개설 시 저장
 app.post('/lectureinfo', (req, res) => {
     const lecture_id = req.body.lecture_id;
     const lecture_name = req.body.lecture_name;
@@ -167,7 +188,7 @@ app.post('/lectureinfo', (req, res) => {
 
 app.post('/announcementinfo', (req, res) => {
     const lecture_id = req.body.lecture_id;
-    const title = req.body.title;
+    const title = req.body.title;//게시물 저장
     const maintext = req.body.maintext;
 
     //강의 테이블에 강의개설 데이터 저장
@@ -235,6 +256,8 @@ app.post('/logininfo', (req, res) => {
         }
     });
 })
+
+
 
 app.get('/logout', (req, res) => {
     req.session.user = null;
