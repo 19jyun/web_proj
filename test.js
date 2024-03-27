@@ -59,15 +59,28 @@ app.get('/signup', (req, res) => {
     res.render('signup');
 });
 
-// app.get('/upload', (req, res) => {
-//     const lecture_id = req.query.lecture_id;
-//     res.render('upload', { lecture_id: lecture_id });
-// });
 app.get('/upload/:lecture_id', (req, res) => {
     const lecture_id = req.params.lecture_id;
     res.render('upload', { lecture_id: lecture_id });
 });
 
+app.get('/recent_announcements/:lecture_id', (req, res) => {
+    const lecture_id = req.params.lecture_id;
+
+    console.log(lecture_id);
+
+    // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
+    var sql = `SELECT * FROM announcements WHERE lecture_id = '${lecture_id}'`;
+
+    connection.query(sql, function (error, announcements) {
+        if (error) {
+            console.log(error);
+        }
+        else{
+            res.render('recent_announcements', { announcements: announcements });
+        }
+    });
+});
 
 app.get('/professors', (req, res) => {
     const professor_id = req.session.user.id; // 세션에서 교수 ID 가져오기

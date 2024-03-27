@@ -1,0 +1,28 @@
+<%- include('header.ejs') %>
+
+<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+
+
+    <header>
+    
+    <h1>최근 공지사항</h1>
+        
+        <div style="overflow-y: scroll; height: 200px;">
+            <ul>
+                <% announcements.forEach(function(announcement, index) { %>
+                    <li>
+                        <strong><%= announcement.title %></strong>
+                        <!-- Directly display rich text as HTML -->
+                        <div class="announcement-text" style="margin-top: 5px;">
+                            <%- announcement.maintext %> <!-- 저장된 부분 그대로 불러오기 -->
+                        </div>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+
+
+
+        
+<%- include('footer.ejs') %>
+```

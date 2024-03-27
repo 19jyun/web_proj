@@ -1,4 +1,7 @@
 <%- include('header.ejs') %>
+
+
+
     <header>
         <nav>
             <ul>
@@ -13,10 +16,13 @@
                     <li><%= lecture.lecture_name %> - <%= lecture.lecture_id %>  </li>
 
                     <button type="button" onclick="location.href = 'upload/' + '<%= lecture.lecture_id %>' ">게시물 작성</button> 
-                    <button type="button">편집</button> <!--얘는 아직 비활성화-->
+                    <button type="button" onclick="location.href = 'recent_announcements/' + '<%= lecture.lecture_id %>' ">편집</button> <!--얘는 아직 비활성화-->
                 <% }); %>
             </ul>
         </div>
+
+
+
 
 <%- include('footer.ejs') %>
 ```
