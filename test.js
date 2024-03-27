@@ -24,7 +24,7 @@ app.set('views', './views');//views 디렉토리 설정
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname))
 app.use(express.json()) //데이터 읽기가 안되는걸 이거 추가해서 해결 (eventlistner로 데이터를 보내는 경우에만 필요한듯)
-app.use(session({ secret: 'test_proj', cookie: { maxAge: 60000 }, resave: true, saveUninitialized: true}))
+app.use(session({ secret: 'test_proj', cookie: { maxAge: 300000 }, resave: true, saveUninitialized: true, rolling: true}))//5분 세션, 클라이언트에서 뭘 할때마다 세션 초기화 (5분동안 idle시 날라간다)
 
 app.use((req, res, next) => { //로컬 파일들 내에서 세션 정보를 사용하기 위한 미들웨어
 
@@ -106,7 +106,22 @@ app.get('/create_lecture', (req, res) => {
 })
 
 app.get('/register_lecture', (req, res) => {
-    res.render('register_lecture');
+    const student_id = req.session.user.id; // 세션에서 현재 학생의 ID 가져오기, 수강 신청시 사용될 예정
+
+    console.log(student_id);
+
+    // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
+    var sql = 'SELECT * FROM lectures';//모든 강의를 가져옴
+
+    connection.query(sql, function (error, lectures) {
+        if (error) {
+            console.log(error);
+        }
+        else{
+            // EJS 템플릿에 강의 데이터를 전달합니다.
+            res.render('register_lecture', { lectures: lectures });
+        }
+    });
 });
 
 app.get('/student', (req, res) => {
@@ -248,10 +263,10 @@ app.post('/logininfo', (req, res) => {
                         console.log(result[0]);
                         
                         if(result[0].identity == 'teacher'){//교수자면 그에 해당하는 페이지로 이동
-                            res.send("<script>alert('로그인 되었습니다.'); location.href='/professors';</script>");
+                            res.send("<script> location.href='/professors';</script>");
                         }
                         else if(result[0].identity == 'student'){//학생이면 그에 해당하는 페이지로 이동
-                            res.send("<script>alert('로그인 되었습니다.'); location.href='/student';</script>");
+                            res.send("<script> location.href='/student';</script>");
                         }
 
                         // proceed with login

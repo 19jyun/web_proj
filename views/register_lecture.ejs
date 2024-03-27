@@ -2,16 +2,45 @@
 
     <h2>수강신청</h2>
 
+    <input type="text" id="search_lecture" placeholder="강의명 혹은 ID를 검색하세요">
+    <ul id="lectureList">
+        <% lectures.forEach(function(lecture) { %>
+            <li><%= lecture.lecture_name %> - <%= lecture.lecture_id %>  </li>
+            <button type="button" onclick="location.href = 'upload/' + '<%= lecture.lecture_id %>' ">수강 신청</button> 
+        <% }); %>
+    </ul> 
+
+    
 
     <header>
-        <nav>
-            <ul>
-                <li><a href="/login">로그인</a></li>
-                <li><a href="/signup">회원가입</a></li>
-                <li><a href="/profile">프로필</a></li>
-                <li><a href="/upload">업로드</a></li>
-            </ul>
-        </nav>
+
+        <script>
+            document.getElementById('search_lecture').addEventListener('input', function() {
+                var searchValue = this.value.toLowerCase();
+                var lectureList = document.getElementById('lectureList');
+                var lectures = lectureList.getElementsByTagName('li');
+                var buttons = lectureList.getElementsByTagName('button');
+    
+                for (var i = 0; i < lectures.length; i++) {
+                    var lectureName = lectures[i].innerText.toLowerCase();
+                    var lectureId = lectures[i].innerText.toLowerCase();
+    
+                    if (lectureName.includes(searchValue) || lectureId.includes(searchValue)) {
+                        if (lectureName.includes(searchValue) || lectureId.includes(searchValue)) {
+                            lectures[i].style.display = 'block';
+                            buttons[i].disabled = false; // Enable the button
+                        } else {
+                            lectures[i].style.display = 'none';
+                            buttons[i].disabled = true; // Disable the button
+                            buttons[i].style.opacity = '0'; // Disable the button
+                        }
+
+                    } else {
+                        lectures[i].style.display = 'none';
+                    }
+                }
+            });
+        </script>
 
 <%- include('footer.ejs') %>
 ```
