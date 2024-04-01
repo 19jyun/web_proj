@@ -26,6 +26,71 @@ app.use(express.static(__dirname))
 app.use(express.json()) //데이터 읽기가 안되는걸 이거 추가해서 해결 (eventlistner로 데이터를 보내는 경우에만 필요한듯)
 app.use(session({ secret: 'test_proj', cookie: { maxAge: 300000 }, resave: true, saveUninitialized: true, rolling: true}))//5분 세션, 클라이언트에서 뭘 할때마다 세션 초기화 (5분동안 idle시 날라간다)
 
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.post('/logininfo', (req, res) => {
+    const id = req.body.id;
+    const password = req.body.password;
+
+    //멤버 테이블에 회원가입 데이터 저장
+    //var sql = `select * from members where id = '${id}' and password = '${password}'`;
+    var sql = `SELECT * FROM members WHERE id = ?`;
+
+    //var values = [id, password];
+
+    connection.query(sql, [id], function (error, result) {
+        if (error) {
+            console.log(error);
+        }
+        else{
+            if (result.length > 0) {
+                req.session.user = result[0];
+    
+                bcrypt.compare(password, result[0].password, function(err, results) {
+                    if(err){
+                        console.log(err);
+                    }
+                    
+                    if (results) {
+                        // Passwords match
+                        console.log('로그인 성공');
+                        console.log(result[0]);
+                        
+                        if(result[0].identity == 'teacher'){//교수자면 그에 해당하는 페이지로 이동
+                            res.send("<script> location.href='/professors';</script>");
+                        }
+                        else if(result[0].identity == 'student'){//학생이면 그에 해당하는 페이지로 이동
+                            res.send("<script> location.href='/student';</script>");
+                        }
+
+                        // proceed with login
+                    } 
+                    else {
+                        // Passwords don't match
+                        console.log('비밀번호 다름');
+                        res.send("<script>alert('아이디 또는 비밀번호가 틀렸습니다.'); location.href='/login';</script>");
+                    }
+                });
+            } else {
+                // No user found with that id
+                res.send("<script>alert('걍 에러입니다.'); location.href='/login';</script>");
+            }
+        }
+    });
+})
+
+function ensureLoggedIn(req, res, next) {
+    if (req.session.user) {
+        next();//
+    } else {
+        res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    }
+}
+
+app.use(ensureLoggedIn);
+
 app.use((req, res, next) => { //로컬 파일들 내에서 세션 정보를 사용하기 위한 미들웨어
 
     res.locals.id = "";
@@ -51,9 +116,7 @@ app.get('/profile', (req, res) => {
     res.render('profile');
 });
 
-app.get('/login', (req, res) => {
-    res.render('login');
-});
+
 
 app.get('/signup', (req, res) => {
     res.render('signup');
@@ -124,9 +187,43 @@ app.get('/register_lecture', (req, res) => {
     });
 });
 
+
+
 app.get('/student', (req, res) => {
-    res.render('student');
+    const student_id = req.session.user.id; // 세션에서 학생 ID 가져오기
+
+    // 학생이 수강신청한 모든 강의의 ID를 가져옴
+    var sqlLectureIds = `SELECT lecture_id FROM student_lecture WHERE student_id = ?`;
+
+    connection.query(sqlLectureIds, [student_id], function (error, lectures) {
+        if (error) {
+            console.log(error);
+            return res.status(500).send('Database error occurred'); // 오류 처리
+        }
+
+        // 학생이 수강신청한 강의가 없으면, 공지사항 없이 강의 데이터만 전달
+        if (lectures.length === 0) {
+            return res.render('student', { lectures: [], announcements: [] });
+        }
+
+        // 학생이 수강신청한 모든 강의의 ID를 배열로 추출
+        var lectureIds = lectures.map(l => l.lecture_id);
+
+        // 추출한 강의 ID 배열을 사용하여 해당 강의의 모든 공지사항을 최신 순으로 가져옴
+        var sqlAnnouncements = `SELECT * FROM announcements WHERE lecture_id IN (?) ORDER BY regdate DESC`;
+
+        connection.query(sqlAnnouncements, [lectureIds], function (error, announcements) {
+            if (error) {
+                console.log(error);
+                return res.status(500).send('Error retrieving data.'); // 오류 처리
+            }
+
+            // EJS 템플릿에 강의 데이터와 공지사항을 전달
+            res.render('student', { lectures: lectures, announcements: announcements });
+        });
+    });
 });
+
 
 
 //회원가입 정보 저장
@@ -214,6 +311,29 @@ app.post('/lectureinfo', (req, res) => {
     });
 })
 
+app.post('/stu_lec_info/', (req, res) => {//학생 수강신청 정보
+    const student_id = req.session.user.id; // 세션에서 현재 학생의 ID 가져오기, 수강 신청시 사용될 예정
+    const lecture_id = req.body.lecture_id;//강의 아이디는 url에서 가져온다
+    const lecture_name = req.body.lecture_name;
+
+    console.log(lecture_id);
+
+    // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
+    var sql = `INSERT INTO student_lecture (student_id, lecture_id, lecture_name) VALUES ('${student_id}', '${lecture_id}', '${lecture_name}')`;
+
+
+    connection.query(sql, function (error, lectures) {
+        if (error) {
+            console.log(error);
+            res.send("<script>alert('에러.'); location.href='/student';</script>");
+        }
+        else{
+            console.log('수강신청이 성공적으로 되었습니다.');
+            res.send("<script>alert('수강신청이 성공적으로 되었습니다.'); location.href='/student';</script>");
+        }
+    });
+});
+
 app.post('/announcementinfo', (req, res) => {
     const lecture_id = req.body.lecture_id;
     const title = req.body.title;//게시물 저장
@@ -234,56 +354,7 @@ app.post('/announcementinfo', (req, res) => {
     });
 })
 
-app.post('/logininfo', (req, res) => {
-    const id = req.body.id;
-    const password = req.body.password;
 
-    //멤버 테이블에 회원가입 데이터 저장
-    //var sql = `select * from members where id = '${id}' and password = '${password}'`;
-    var sql = `SELECT * FROM members WHERE id = ?`;
-
-    //var values = [id, password];
-
-    connection.query(sql, [id], function (error, result) {
-        if (error) {
-            console.log(error);
-        }
-        else{
-            if (result.length > 0) {
-                req.session.user = result[0];
-    
-                bcrypt.compare(password, result[0].password, function(err, results) {
-                    if(err){
-                        console.log(err);
-                    }
-                    
-                    if (results) {
-                        // Passwords match
-                        console.log('로그인 성공');
-                        console.log(result[0]);
-                        
-                        if(result[0].identity == 'teacher'){//교수자면 그에 해당하는 페이지로 이동
-                            res.send("<script> location.href='/professors';</script>");
-                        }
-                        else if(result[0].identity == 'student'){//학생이면 그에 해당하는 페이지로 이동
-                            res.send("<script> location.href='/student';</script>");
-                        }
-
-                        // proceed with login
-                    } 
-                    else {
-                        // Passwords don't match
-                        console.log('비밀번호 다름');
-                        res.send("<script>alert('아이디 또는 비밀번호가 틀렸습니다.'); location.href='/login';</script>");
-                    }
-                });
-            } else {
-                // No user found with that id
-                res.send("<script>alert('걍 에러입니다.'); location.href='/login';</script>");
-            }
-        }
-    });
-})
 
 
 

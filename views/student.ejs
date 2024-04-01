@@ -4,7 +4,7 @@
 
         <nav>
             <ul>
-                <button type="text" onclick="location.href = 'register_lecture' ">새 강의</button>
+                <button type="text" onclick="location.href = 'register_lecture' ">수강신청</button>
             </ul>
         </nav>
 
@@ -12,7 +12,37 @@
 
             <h1>내가 수강 중인 강의 목록</h1>
 
+            <ul id="lectureList">
+                <% lectures.forEach(function(lecture) { %>
+                    <div>
+        
+                        <li>
+                            <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
+                        </li>
+                        <input type="hidden" name="lecture_id" value="<%= lecture.lecture_id %>">
+                        <button type="submit" onclick="location.href = 'recent_announcements/' + '<%= lecture.lecture_id %>' ">게시물 보기</button>
+        
+                    </div>
+        
+                    <% }); %>
+            </ul>
+
             <h2>활동 스트림</h2>
+
+            <div style="overflow-y: scroll; height: 200px;">
+                <ul>
+                    <% announcements.forEach(function(announcement, index) { %>
+                        <li>
+                            <strong> <%= announcement.lecture_id %> - <%= announcement.regdate %></strong><br>
+                            제목: <%= announcement.title %>
+                            <!-- Directly display rich text as HTML -->
+                            <div class="announcement-text" style="margin-top: 5px;">
+                                <%- announcement.maintext %> <!-- 저장된 부분 그대로 불러오기, 다만 가장 최신 순으로 안불러와짐. -->
+                            </div>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
 
         </nav>
 
