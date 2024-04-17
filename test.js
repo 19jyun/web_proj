@@ -11,11 +11,10 @@ const mysql = require('mysql2');
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'nintendods123#',
-    database: 'MySql-local'
-  });
+    password: 'qwer',
+    database: 'MySql-local',
+});
 console.log("connected to mysql");
-
 
 app.set('view engine', 'ejs');
 app.set('views', './views');//views 디렉토리 설정
@@ -75,7 +74,7 @@ app.post('/logininfo', (req, res) => {
                 });
             } else {
                 // No user found with that id
-                res.send("<script>alert('걍 에러입니다.'); location.href='/login';</script>");
+                res.send("<script>alert('아이디 또는 비밀번호가 틀렸습니다.'); location.href='/login';</script>");
             }
         }
     });
@@ -129,6 +128,7 @@ app.get('/upload/:lecture_id', (req, res) => {
 
 app.get('/recent_announcements/:lecture_id', (req, res) => {
     const lecture_id = req.params.lecture_id;
+    const identity = req.session.user.identity; // 세션에서 학생 ID 가져오기
 
     console.log(lecture_id);
 
@@ -140,7 +140,7 @@ app.get('/recent_announcements/:lecture_id', (req, res) => {
             console.log(error);
         }
         else{
-            res.render('recent_announcements', { announcements: announcements });
+            res.render('recent_announcements', { announcements: announcements, lecture:lecture_id, identity:identity });
         }
     });
 });
@@ -224,7 +224,20 @@ app.get('/student', (req, res) => {
     });
 });
 
+// 게시물 편집 라우트
+app.get('/edit_announcement/:lecture_id/:idx', function(req, res) {
+    // 게시물 ID를 URL 매개변수에서 가져옵니다.
+    var lecture_id = req.params.lecture_id;
+    var idx = req.params.idx;
 
+    // 데이터베이스에서 해당 강의 ID와 공지사항 ID의 공지사항을 찾습니다.
+    connection.query('SELECT * FROM announcements WHERE lecture_id = ? AND idx = ?', [lecture_id, idx], function(error, results, fields) {
+        if (error) throw error;
+
+        // 편집이 완료되면, 사용자를 게시물 목록 페이지로 리다이렉트합니다.
+        res.render('edit_announcement', { announcement: results[0] }); //이 announcement의 값들을 보여줘야된다
+    });
+});
 
 //회원가입 정보 저장
 app.post('/signupinfo', (req, res) => {
@@ -319,6 +332,19 @@ app.post('/stu_lec_info/', (req, res) => {//학생 수강신청 정보
     console.log(lecture_id);
 
     // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
+
+    var updatenum = `UPDATE lectures SET cur_num = cur_num + 1 WHERE lecture_id = ? AND cur_num < max_num`; //현재 수강중인 학생 수를 업데이트
+
+    connection.query(updatenum, [lecture_id], function (error, results) {
+        if (error) {
+            console.log(error);
+        } else {
+            if (results.affectedRows === 0) {
+                console.log("학생 수 초과");
+            }
+        }
+    });
+
     var sql = `INSERT INTO student_lecture (student_id, lecture_id, lecture_name) VALUES ('${student_id}', '${lecture_id}', '${lecture_name}')`;
 
 
@@ -354,8 +380,39 @@ app.post('/announcementinfo', (req, res) => {
     });
 })
 
+app.post('/editannouncementinfo', (req, res) => {
+    const lecture_id = req.body.lecture_id;
+    const title = req.body.title;//게시물 저장
+    const maintext = req.body.maintext;
+    const idx = req.body.idx;
 
+    //강의 테이블에 강의개설 데이터 저장
+    var sql = `UPDATE announcements SET lecture_id = ?, title = ?, maintext = ?, regdate = now() WHERE idx = ?`;
+connection.query(sql, [lecture_id, title, maintext, idx], function (error, results) {
+    if (error) {
+        console.log(error);
+    }
+    else{
+        console.log('공지사항이 수정됐습니다.');
+        res.send(`<script>alert('공지사항이 수정됐습니다.'); location.href='/recent_announcements/${lecture_id}';</script>`);
+    }
+});
+})
 
+// 게시물 삭제 라우트
+app.post('/delete_announcement/:lecture_id/:idx', function(req, res) {
+    // 게시물 ID를 URL 매개변수에서 가져옵니다.
+    var idx = req.params.idx;
+    var lecture_id = req.params.lecture_id;
+
+    // 데이터베이스에서 해당 ID의 게시물을 찾아 삭제합니다.
+    connection.query('DELETE FROM announcements WHERE idx = ?', [idx], function(error, results, fields) {
+        if (error) throw error;
+    
+        // 삭제가 완료되면, 사용자를 게시물 목록 페이지로 리다이렉트합니다.
+        res.send(`<script>alert('게시물이 삭제 되었습니다.'); location.href='/recent_announcements/${lecture_id}';</script>`);
+    });
+});
 
 
 app.get('/logout', (req, res) => {

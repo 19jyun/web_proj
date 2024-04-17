@@ -5,17 +5,26 @@
 
     <header>
     
-    <h1>최근 공지사항</h1>
+    <h1><%= lecture %></h1>
+    <h2>최근 공지사항</h2>
         
         <div style="overflow-y: scroll; height: 200px;">
             <ul>
                 <% announcements.forEach(function(announcement, index) { %>
                     <li>
-                        <strong><%= announcement.title %></strong>
+                        <strong><%= announcement.title %> - <%= announcement.regdate %></strong>
                         <!-- Directly display rich text as HTML -->
                         <div class="announcement-text" style="margin-top: 5px;">
                             <%- announcement.maintext %> <!-- 저장된 부분 그대로 불러오기 -->
                         </div>
+
+                        <!--편집 삭제 버튼은 학생이면 사라져야된다-->
+                        <% if (identity !== 'student') { %>
+                            <button type="submit" onclick="location.href = '/edit_announcement/' + '<%= announcement.lecture_id %>' + '/' +  '<%= announcement.idx%>' ">편집</button>
+                        <form action="/delete_announcement/<%= announcement.lecture_id %>/<%= announcement.idx%>" method="post">
+                            <button type="submit">삭제</button>
+                        </form>
+                        <% } %>
                     </li>
                 <% }); %>
             </ul>

@@ -1,0 +1,21 @@
+<%- include ('header') %>
+
+<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+
+<form action="/editannouncementinfo" method="post">
+
+    <input type="hidden" name="lecture_id" value="<%= announcement.lecture_id %>"></input>
+    <input type="hidden" name="idx" value="<%= announcement.idx %>"></input>
+
+    <li>게시물 편집</li>
+        <li>제목: <input type="text" name="title" value="<%= announcement.title %>"> </input></li>
+        <li>본문: <textarea id="maintext" name="maintext"><%= announcement.maintext %></textarea></li> <!-- 수정된 부분 -->
+
+        <button type="submit">업데이트</button> <!--버튼 누르면 해당 lecture의 id를 가지고 함꼐 업로드 실행-->
+</form>
+
+<script>
+    CKEDITOR.replace( 'maintext' );
+</script>
+
+<%- include ('footer') %>
