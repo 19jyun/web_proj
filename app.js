@@ -407,41 +407,51 @@ app.post('/lectureinfo', (req, res) => {
     });
 })
 
-app.post('/stu_lec_info/', (req, res) => {//학생 수강신청 정보
-    const student_id = req.session.user.id; // 세션에서 현재 학생의 ID 가져오기, 수강 신청시 사용될 예정
-    const lecture_id = req.body.lecture_id;//강의 아이디는 url에서 가져온다
+app.post('/stu_lec_info/', (req, res) => {
+    const student_id = req.session.user.id;
+    const lecture_id = req.body.lecture_id;
     const lecture_name = req.body.lecture_name;
 
-    console.log(lecture_id);
+    // Check if the student is already enrolled in the course
+    var checkEnrollmentQuery = `SELECT * FROM student_lecture WHERE student_id = ? AND lecture_id = ?`;
 
-    // 교수의 아이디로 되어있는 모든 리스트들을 데이터베이스에서 대조해서 가져옴
-
-    var updatenum = `UPDATE lectures SET cur_num = cur_num + 1 WHERE lecture_id = ? AND cur_num < max_num`; //현재 수강중인 학생 수를 업데이트
-
-    connection.query(updatenum, [lecture_id], function (error, results) {
+    connection.query(checkEnrollmentQuery, [student_id, lecture_id], function (error, results) {
         if (error) {
             console.log(error);
+            return res.status(500).send('Database error');
+        }
+
+        if (results.length > 0) {
+            // The student is already enrolled in this course
+            var sql = 'SELECT * FROM lectures'; // 다시 강의 목록을 가져옴
+            connection.query(sql, function (error, lectures) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    return res.render('register_lecture', {
+                        lectures: lectures,
+                        errorMessage: '이미 수강신청이 되어 있는 수업입니다.'
+                    });
+                }
+            });
         } else {
-            if (results.affectedRows === 0) {
-                console.log("학생 수 초과");
-            }
-        }
-    });
-
-    var sql = `INSERT INTO student_lecture (student_id, lecture_id, lecture_name) VALUES ('${student_id}', '${lecture_id}', '${lecture_name}')`;
-
-
-    connection.query(sql, function (error, lectures) {
-        if (error) {
-            console.log(error);
-            res.send("<script>alert('에러.'); location.href='/student';</script>");
-        }
-        else {
-            console.log('수강신청이 성공적으로 되었습니다.');
-            res.send("<script>alert('수강신청이 성공적으로 되었습니다.'); location.href='/student';</script>");
+            // Proceed with the enrollment
+            var sql = `INSERT INTO student_lecture (student_id, lecture_id, lecture_name) VALUES (?, ?, ?)`;
+            connection.query(sql, [student_id, lecture_id, lecture_name], function (error, lectures) {
+                if (error) {
+                    console.log(error);
+                    res.send("<script>alert('에러.'); location.href='/student';</script>");
+                } else {
+                    console.log('수강신청이 성공적으로 되었습니다.');
+                    res.send("<script>alert('수강신청이 성공적으로 되었습니다.'); location.href='/student';</script>");
+                }
+            });
         }
     });
 });
+
+
+
 
 app.post('/announcementinfo', (req, res) => {
     const lecture_id = req.body.lecture_id;

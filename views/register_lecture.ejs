@@ -30,7 +30,7 @@
     </div>
 
     <script>
-        document.getElementById('search_lecture').addEventListener('input', function () {//강의 검색
+        document.getElementById('search_lecture').addEventListener('input', function () {
             var searchValue = this.value.toLowerCase();
             var lectureList = document.getElementById('lectureList');
             var lectures = lectureList.getElementsByTagName('li');
@@ -42,13 +42,17 @@
 
                 if (lectureName.includes(searchValue) || lectureId.includes(searchValue)) {
                     lectures[i].style.display = 'block';
-                    buttons[i].style.display = 'block'; // Show the button for the matching lecture
+                    buttons[i].style.display = 'block';
                 } else {
                     lectures[i].style.display = 'none';
-                    buttons[i].style.display = 'none'; // Hide the button for the non-matching lecture
+                    buttons[i].style.display = 'none';
                 }
             }
         });
+
+    <% if (typeof errorMessage !== 'undefined') { %>
+            alert('<%= errorMessage %>');
+    <% } %>
     </script>
 
     <%- include('footer.ejs') %>

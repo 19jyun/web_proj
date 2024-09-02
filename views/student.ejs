@@ -2,6 +2,7 @@
 
     <div class="container">
 
+        <!-- 내가 수강 중인 강의 목록 -->
         <div class="title-center">
             <h2>내가 수강 중인 강의 목록</h2>
             <button type="button" onclick="location.href='register_lecture'" class="submit-button">수강신청</button>
@@ -9,48 +10,52 @@
 
         <div class="announcement-container">
             <% if (lectures.length> 0) { %>
-                <ul class="announcement-list">
-                    <% lectures.forEach(function(lecture) { %>
-                        <li class="announcement-item">
-                            <strong class="announcement-title">
-                                <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
-                            </strong>
-                            <div class="button-group">
-                                <button type="submit"
-                                    onclick="location.href='recent_announcements/<%= lecture.lecture_id %>'"
-                                    class="submit-button">게시물 보기</button>
-                            </div>
-                        </li>
-                        <% }); %>
-                </ul>
-                <% } else { %>
-                    <p class="no-announcements">수강 중인 강의가 없습니다!</p>
-                    <% } %>
+                <% lectures.forEach(function(lecture) { %>
+                    <div class="announcement-item">
+                        <strong class="announcement-title">
+                            <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
+                        </strong>
+                        <div class="button-group">
+                            <button type="submit"
+                                onclick="location.href='recent_announcements/<%= lecture.lecture_id %>'"
+                                class="submit-button">게시물 보기</button>
+                        </div>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="no-announcements">수강 중인 강의가 없습니다!</p>
+                            <% } %>
         </div>
 
+        <!-- 활동 스트림 -->
         <div class="title-center">
             <h2>활동 스트림</h2>
         </div>
 
         <div class="announcement-container">
             <% if (announcements.length> 0) { %>
-                <ul class="announcement-list">
-                    <% announcements.forEach(function(announcement, index) { %>
-                        <li class="announcement-item">
-                            <strong class="announcement-title">
-                                <%= announcement.lecture_id %> - <%= announcement.regdate %>
-                            </strong>
-                            <div class="announcement-text" style="margin-top: 5px;">
-                                제목: <%= announcement.title %>
-                                    <p><%- announcement.maintext %></p>
-                            </div>
-                        </li>
-                        <% }); %>
-                </ul>
-                <% } else { %>
-                    <p class="no-announcements">활동 스트림이 비어있습니다!</p>
-                    <% } %>
+                <% announcements.forEach(function(announcement, index) { %>
+                    <div class="announcement-item">
+                        <strong class="announcement-title">
+                            <%= announcement.lecture_id %>
+                        </strong>
+
+                        <strong class="announcement-title">
+                            <%= announcement.title %>
+                        </strong>
+                        <span class="announcement-time">
+                            <%= announcement.regdate %>
+                        </span>
+                        <div class="announcement-text">
+                            <%- announcement.maintext %> <!-- 저장된 부분 그대로 불러오기 -->
+                        </div>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="no-announcements">활동 스트림이 비어있습니다!</p>
+                            <% } %>
         </div>
+
     </div>
 
     <%- include('footer.ejs') %>
