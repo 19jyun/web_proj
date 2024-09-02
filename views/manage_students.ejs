@@ -1,0 +1,29 @@
+<%- include('header.ejs') %>
+
+    <div class="container">
+        <h1 class="lecture-code">
+            <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
+        </h1>
+        <h2 class="announcement-header">수강생 관리</h2>
+
+        <div class="announcement-container">
+            <% if (students.length> 0) { %>
+                <% students.forEach(function(student) { %>
+                    <div class="announcement-item">
+                        <strong class="announcement-title">
+                            <%= student.name %> (학번: <%= student.studentnum %>)
+                        </strong>
+                        <form action="/remove_student" method="post" class="button-group">
+                            <input type="hidden" name="student_id" value="<%= student.student_id %>">
+                            <input type="hidden" name="lecture_id" value="<%= lecture.lecture_id %>">
+                            <button type="submit" class="submit-button">수강 취소</button>
+                        </form>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="no-announcements">수강 중인 학생이 없습니다!</p>
+                            <% } %>
+        </div>
+    </div>
+
+    <%- include('footer.ejs') %>

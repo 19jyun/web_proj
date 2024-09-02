@@ -1,0 +1,284 @@
+/* 헤더 스타일 */
+.header-container {
+    text-align: center;
+    padding: 20px;
+    background-color: white;
+    border-bottom: 2px solid rgb(151, 12, 40);
+    font-size: 1.5em;
+}
+
+.welcome-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    color: rgb(151, 12, 40);
+}
+
+.welcome-message p {
+    margin: 0;
+}
+
+.welcome-message strong {
+    font-weight: bold;
+    color: rgb(151, 12, 40);
+}
+
+.logout-button {
+    background-color: rgb(151, 12, 40);
+    color: white;
+    padding: 3px 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.logout-button:hover {
+    background-color: #a00e2d;
+}
+
+.auth-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.auth-links li {
+    display: inline;
+}
+
+.auth-links .nav-link {
+    color: rgb(151, 12, 40);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-links .nav-link:hover {
+    text-decoration: underline;
+}
+
+/* 업로드 및 목록 스타일 */
+.upload-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.upload-container h2 {
+    text-align: center;
+    color: rgb(151, 12, 40);
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: rgb(151, 12, 40);
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-group input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.button-group button,
+.submit-button,
+.check-id-button {
+    background-color: rgb(151, 12, 40);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.button-group button:hover,
+.submit-button:hover {
+    background-color: #a00e2d;
+}
+
+.title-center {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* 활동 스트림 및 강의 목록 */
+.activity-stream {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.lecture-item,
+.announcement-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 50%;
+    /* 게시글 넓이를 더 줄임 */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.no-announcements {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.announcement-title,
+.lecture-item strong {
+    font-size: 1.2em;
+    color: rgb(151, 12, 40);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.announcement-time {
+    font-size: 0.9em;
+    /* 폰트 크기를 조금 더 작게 */
+    color: #000;
+    /* 검은색으로 변경 */
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.announcement-text {
+    background-color: #f5f5f5;
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* 최근 공지사항 및 강의 코드 */
+.announcement-header,
+.lecture-code {
+    text-align: center;
+    font-weight: bold;
+    color: rgb(151, 12, 40);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+/* 리스트 스타일 제거 */
+.announcement-list {
+    list-style-type: none;
+    /* 리스트 점 제거 */
+    padding: 0;
+    margin: 0;
+}
+
+/* 리스트 항목 스타일링 */
+.announcement-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 푸터 스타일 */
+footer {
+    text-align: center;
+    padding: 20px;
+    color: rgb(151, 12, 40);
+    font-size: 0.9em;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid rgb(151, 12, 40);
+    margin: 20px 0;
+}
+
+.register-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.register-container h2 {
+    text-align: center;
+    color: rgb(151, 12, 40);
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.lecture-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.lecture-info p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.register-form {
+    display: flex;
+    align-items: center;
+}
+
+.submit-button {
+    background-color: rgb(151, 12, 40);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.submit-button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: #a00e2d;
+}

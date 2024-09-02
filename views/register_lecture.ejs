@@ -1,63 +1,54 @@
 <%- include('header.ejs') %>
 
+    <div class="register-container">
+        <h2>수강신청</h2>
 
-<form action="/stu_lec_info" method="post">
+        <div class="form-group">
+            <input type="text" id="search_lecture" class="search-input" placeholder="강의명 혹은 ID를 검색하세요">
+        </div>
 
-    <h2>수강신청</h2>
+        <ul id="lectureList" class="lecture-list">
+            <% lectures.forEach(function(lecture) { %>
+                <li class="lecture-item">
+                    <div class="lecture-info">
+                        <strong>
+                            <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
+                        </strong>
+                        <p>현 인원/정원: <%= lecture.cur_num %>/<%= lecture.max_num %>
+                        </p>
+                    </div>
 
-    <input type="text" id="search_lecture" placeholder="강의명 혹은 ID를 검색하세요">
-    <ul id="lectureList">
-        <% lectures.forEach(function(lecture) { %>
-            <div>
-
-                <li>
-                    <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
-                    <br> <!-- Add a line break here -->
-                    현 인원/정원: <%= lecture.cur_num %>/<%= lecture.max_num %>
+                    <form action="/stu_lec_info" method="post" class="register-form">
+                        <input type="hidden" name="lecture_id" value="<%= lecture.lecture_id %>">
+                        <input type="hidden" name="lecture_name" value="<%= lecture.lecture_name %>">
+                        <button type="submit" class="submit-button" <%=lecture.cur_num==lecture.max_num ? 'disabled'
+                            : '' %>>수강 신청</button>
+                    </form>
                 </li>
-                
+                <% }); %>
+        </ul>
+    </div>
 
-                <form action="/stu_lec_info" method="post">
+    <script>
+        document.getElementById('search_lecture').addEventListener('input', function () {//강의 검색
+            var searchValue = this.value.toLowerCase();
+            var lectureList = document.getElementById('lectureList');
+            var lectures = lectureList.getElementsByTagName('li');
+            var buttons = lectureList.getElementsByTagName('button');
 
-                    <input type="hidden" name="lecture_id" value="<%= lecture.lecture_id %>">
-                    <input type="hidden" name="lecture_name" value="<%= lecture.lecture_name %>">
-                    <button type="submit" onclick="location.href = 'stu_lec_info/' " <%= lecture.cur_num == lecture.max_num ? 'disabled' : '' %>>수강 신청</button>
+            for (var i = 0; i < lectures.length; i++) {
+                var lectureName = lectures[i].innerText.toLowerCase();
+                var lectureId = lectures[i].innerText.toLowerCase();
 
-                </form>
-
-            </div>
-
-            <% }); %>
-    </ul>
-
-</form>
-
-    <header>
-
-        <script>
-            document.getElementById('search_lecture').addEventListener('input', function () {//강의 검색
-                var searchValue = this.value.toLowerCase();
-                var lectureList = document.getElementById('lectureList');
-                var lectures = lectureList.getElementsByTagName('li');
-                var buttons = lectureList.getElementsByTagName('button');
-
-                for (var i = 0; i < lectures.length; i++) {
-                    var lectureName = lectures[i].innerText.toLowerCase();
-                    var lectureId = lectures[i].innerText.toLowerCase();
-
-                    if (lectureName.includes(searchValue) || lectureId.includes(searchValue)) {
-                        lectures[i].style.display = 'block';
-                        buttons[i].style.display = 'block'; // Show the button for the matching lecture
-                    } else {
-                        lectures[i].style.display = 'none';
-                        buttons[i].style.display = 'none'; // Hide the button for the non-matching lecture
-                    }
+                if (lectureName.includes(searchValue) || lectureId.includes(searchValue)) {
+                    lectures[i].style.display = 'block';
+                    buttons[i].style.display = 'block'; // Show the button for the matching lecture
+                } else {
+                    lectures[i].style.display = 'none';
+                    buttons[i].style.display = 'none'; // Hide the button for the non-matching lecture
                 }
-            });
+            }
+        });
+    </script>
 
-
-
-        </script>
-
-        <%- include('footer.ejs') %>
-            ```
+    <%- include('footer.ejs') %>

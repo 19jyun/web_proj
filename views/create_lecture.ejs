@@ -1,17 +1,24 @@
 <%- include('header.ejs') %>
 
-    <h2>새 강의</h2>
+    <div class="upload-container">
+        <h2>새 강의</h2>
 
+        <form action="/lectureinfo" method="post">
+            <div class="form-group">
+                <label for="lecture_id">Lecture ID(EX: COSE461-00):</label>
+                <input type="text" id="lecture_id" name="lecture_id">
+            </div>
+            <div class="form-group">
+                <label for="lecture_name">강의 이름:</label>
+                <input type="text" id="lecture_name" name="lecture_name">
+            </div>
+            <div class="form-group">
+                <label for="max_num">최대 수강 인원:</label>
+                <input type="number" id="max_num" name="max_num">
+            </div>
 
-    <form action="/lectureinfo" method="post">
+            <button type="submit" class="submit-button">강의 개설</button>
+        </form>
+    </div>
 
-        <li>회원가입</li>
-            <li>Lecture ID(EX: COSE461-00): <input type="text" name="lecture_id"> </input></li>
-            <li>강의 이름: <input type="text" name="lecture_name"> </input></li>
-            <li>최대 수강 인원: <input type="number" name="max_num"> </input></li>
-    
-        <button type="submit">강의 개설</button>
-    </form>
-
-<%- include('footer.ejs') %>
-```
+    <%- include('footer.ejs') %>

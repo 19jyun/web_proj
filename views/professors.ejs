@@ -1,28 +1,28 @@
 <%- include('header.ejs') %>
 
-
-
-    <header>
-        <nav>
-            <ul>
-                <button type="text" onclick="location.href = 'create_lecture' ">새 강의</button>
-            </ul>
-        </nav>
-
-        <h2>나의 강의 목록</h2>
-        <div style="overflow-y: scroll; height: 200px;">
-            <ul>
-                <% lectures.forEach(function(lecture) { %>
-                    <li><%= lecture.lecture_name %> - <%= lecture.lecture_id %>  </li>
-
-                    <button type="button" onclick="location.href = 'upload/' + '<%= lecture.lecture_id %>' ">게시물 작성</button> 
-                    <button type="button" onclick="location.href = 'recent_announcements/' + '<%= lecture.lecture_id %>' ">편집</button> <!--얘는 아직 비활성화-->
-                <% }); %>
-            </ul>
+    <div class="container">
+        <div class="title-center">
+            <h2>나의 강의 목록</h2>
+            <button type="button" onclick="location.href='create_lecture'" class="submit-button">새 강의 개설</button>
         </div>
 
+        <div class="announcement-container">
+            <% lectures.forEach(function(lecture) { %>
+                <div class="announcement-item">
+                    <strong class="announcement-title">
+                        <%= lecture.lecture_name %> - <%= lecture.lecture_id %>
+                    </strong>
+                    <div class="button-group">
+                        <button type="button" onclick="location.href='manage_students/<%= lecture.lecture_id %>'"
+                            class="submit-button">수강생 관리</button>
+                        <button type="button" onclick="location.href='upload/<%= lecture.lecture_id %>'"
+                            class="submit-button">게시물 작성</button>
+                        <button type="button" onclick="location.href='recent_announcements/<%= lecture.lecture_id %>'"
+                            class="submit-button">편집</button>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+    </div>
 
-
-
-<%- include('footer.ejs') %>
-```
+    <%- include('footer.ejs') %>

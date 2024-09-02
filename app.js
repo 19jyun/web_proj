@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const ejs = require('ejs');
 const bodyParser = require('body-parser');
@@ -5,25 +6,27 @@ var session = require('express-session')
 const bcrypt = require('bcrypt');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'qwer',
-    database: 'MySql-local',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 console.log("connected to mysql");
 
 app.set('view engine', 'ejs');
 app.set('views', './views');//views 디렉토리 설정
 
+app.use(express.static('public'));
+
 // bodyParser 미들웨어 설정
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname))
 app.use(express.json()) //데이터 읽기가 안되는걸 이거 추가해서 해결 (eventlistner로 데이터를 보내는 경우에만 필요한듯)
-app.use(session({ secret: 'test_proj', cookie: { maxAge: 300000 }, resave: true, saveUninitialized: true, rolling: true}))//5분 세션, 클라이언트에서 뭘 할때마다 세션 초기화 (5분동안 idle시 날라간다)
+app.use(session({ secret: process.env.SESSION_SECRET, cookie: { maxAge: 300000 }, resave: true, saveUninitialized: true, rolling: true }))//5분 세션, 클라이언트에서 뭘 할때마다 세션 초기화 (5분동안 idle시 날라간다)
 
 app.get('/login', (req, res) => {
     res.render('login');
@@ -43,29 +46,29 @@ app.post('/logininfo', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
+        else {
             if (result.length > 0) {
                 req.session.user = result[0];
-    
-                bcrypt.compare(password, result[0].password, function(err, results) {
-                    if(err){
+
+                bcrypt.compare(password, result[0].password, function (err, results) {
+                    if (err) {
                         console.log(err);
                     }
-                    
+
                     if (results) {
                         // Passwords match
                         console.log('로그인 성공');
                         console.log(result[0]);
-                        
-                        if(result[0].identity == 'teacher'){//교수자면 그에 해당하는 페이지로 이동
+
+                        if (result[0].identity == 'teacher') {//교수자면 그에 해당하는 페이지로 이동
                             res.send("<script> location.href='/professors';</script>");
                         }
-                        else if(result[0].identity == 'student'){//학생이면 그에 해당하는 페이지로 이동
+                        else if (result[0].identity == 'student') {//학생이면 그에 해당하는 페이지로 이동
                             res.send("<script> location.href='/student';</script>");
                         }
 
                         // proceed with login
-                    } 
+                    }
                     else {
                         // Passwords don't match
                         console.log('비밀번호 다름');
@@ -81,8 +84,14 @@ app.post('/logininfo', (req, res) => {
 })
 
 function ensureLoggedIn(req, res, next) {
-    if (req.session.user) {
-        next();//
+    const openPaths = ['/signup', '/checkid', '/signupinfo']; // 예외 처리할 경로들
+    if (openPaths.includes(req.path)) {
+        next();
+    } else if (req.session.isLoggedIn) {
+        next();
+    } else if (req.session.user) {
+        req.session.isLoggedIn = true;
+        next();
     } else {
         res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     }
@@ -93,15 +102,15 @@ app.use(ensureLoggedIn);
 app.use((req, res, next) => { //로컬 파일들 내에서 세션 정보를 사용하기 위한 미들웨어
 
     res.locals.id = "";
-    res.locals.name ="";
+    res.locals.name = "";
 
-    if(req.session.user){
+    if (req.session.user) {
         res.locals.id = req.session.user.id
         res.locals.name = req.session.user.name
     }
-    
+
     next()
-  })
+})
 
 // 라우팅
 app.get('/', (req, res) => {
@@ -139,8 +148,8 @@ app.get('/recent_announcements/:lecture_id', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
-            res.render('recent_announcements', { announcements: announcements, lecture:lecture_id, identity:identity });
+        else {
+            res.render('recent_announcements', { announcements: announcements, lecture: lecture_id, identity: identity });
         }
     });
 });
@@ -157,7 +166,7 @@ app.get('/professors', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
+        else {
             // EJS 템플릿에 강의 데이터를 전달합니다.
             res.render('professors', { lectures: lectures });
         }
@@ -180,13 +189,12 @@ app.get('/register_lecture', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
+        else {
             // EJS 템플릿에 강의 데이터를 전달합니다.
             res.render('register_lecture', { lectures: lectures });
         }
     });
 });
-
 
 
 app.get('/student', (req, res) => {
@@ -225,19 +233,96 @@ app.get('/student', (req, res) => {
 });
 
 // 게시물 편집 라우트
-app.get('/edit_announcement/:lecture_id/:idx', function(req, res) {
+app.get('/edit_announcement/:lecture_id/:idx', function (req, res) {
     // 게시물 ID를 URL 매개변수에서 가져옵니다.
     var lecture_id = req.params.lecture_id;
     var idx = req.params.idx;
 
     // 데이터베이스에서 해당 강의 ID와 공지사항 ID의 공지사항을 찾습니다.
-    connection.query('SELECT * FROM announcements WHERE lecture_id = ? AND idx = ?', [lecture_id, idx], function(error, results, fields) {
+    connection.query('SELECT * FROM announcements WHERE lecture_id = ? AND idx = ?', [lecture_id, idx], function (error, results, fields) {
         if (error) throw error;
 
         // 편집이 완료되면, 사용자를 게시물 목록 페이지로 리다이렉트합니다.
         res.render('edit_announcement', { announcement: results[0] }); //이 announcement의 값들을 보여줘야된다
     });
 });
+
+
+app.get('/manage_students/:lecture_id', (req, res) => {
+    const lecture_id = req.params.lecture_id;
+    const loggedInProfessorId = req.session.user.id; // 현재 로그인된 교수의 professor_id
+
+    // 해당 강의의 professor_id와 lecture 정보를 데이터베이스에서 조회합니다.
+    const query = 'SELECT * FROM lectures WHERE lecture_id = ?';
+    connection.query(query, [lecture_id], (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Database error');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('Lecture not found');
+        }
+
+        const lecture = results[0];
+
+        // 현재 로그인된 교수의 professor_id와 해당 강의의 professor_id가 일치하는지 확인합니다.
+        if (loggedInProfessorId !== lecture.professor_id) {
+            return res.status(403).send('Access denied');
+        }
+
+        // 강의를 수강 중인 학생들을 조회합니다.
+        const studentQuery = `
+            SELECT s.id as student_id, s.name, s.studentnum, sl.lecture_id 
+            FROM student_lecture sl 
+            JOIN members s ON sl.student_id = s.id 
+            WHERE sl.lecture_id = ?`;
+
+        connection.query(studentQuery, [lecture_id], (studentError, students) => {
+            if (studentError) {
+                console.error(studentError);
+                return res.status(500).send('Database error');
+            }
+
+            // 수강생 관리 페이지로 이동하면서 학생 리스트와 강의 정보를 전달합니다.
+            res.render('manage_students', { lecture: lecture, students: students });
+        });
+    });
+});
+
+
+
+app.post('/remove_student', (req, res) => {
+    const student_id = req.body.student_id;
+    const lecture_id = req.body.lecture_id;
+
+    console.log(`Removing student ${student_id} from lecture ${lecture_id}`);
+
+    // student_lecture 테이블에서 해당 학생을 삭제합니다.
+    var sql = `DELETE FROM student_lecture WHERE student_id = ? AND lecture_id = ?`;
+
+    connection.query(sql, [student_id, lecture_id], function (error, results) {
+        if (error) {
+            console.log(error);
+            res.status(500).send('Database error');
+        } else {
+            console.log(`Student ${student_id} removed from lecture ${lecture_id}`);
+
+            var updateSql = `UPDATE lectures SET cur_num = cur_num - 1 WHERE lecture_id = ?`;
+
+            connection.query(updateSql, [lecture_id], function (updateError, updateResults) {
+                if (updateError) {
+                    console.log(updateError);
+                    res.status(500).send('Database error');
+                } else {
+                    console.log(`Lecture ${lecture_id} cur_num decreased by 1`);
+                    res.send(`<script>alert('수강이 취소되었습니다.'); location.href='/manage_students/${lecture_id}';</script>`);
+                }
+            });
+        }
+    });
+});
+
 
 //회원가입 정보 저장
 app.post('/signupinfo', (req, res) => {
@@ -250,14 +335,13 @@ app.post('/signupinfo', (req, res) => {
     const studentnum = req.body.studentnum;
     const identity = req.body.identity;
 
-    bcrypt.hash(password, 10, function(err, hash) {
+    bcrypt.hash(password, 10, function (err, hash) {
         // Now store hash in your password DB.
         if (err) {
             console.error("Error hashing password:", err);
             return res.status(500).send("Error creating account.");
         }
-        
-        // Assuming you have a `members` table and the connection to the database is established
+
         var sql = `INSERT INTO members (id, name, password, studentnum, identity) VALUES (?, ?, ?, ?, ?)`;
 
         connection.query(sql, [id, name, hash, studentnum, identity], function (error, results) {
@@ -280,7 +364,6 @@ app.post('/checkid', (req, res) => {
 
     // 데이터베이스에서 'id' 값이 이미 존재하는지 확인합니다.
     // 이 예에서는 'users' 테이블을 사용하고 있습니다.
-    // 실제 데이터베이스와 테이블 이름에 따라 이 코드를 수정해야 합니다.
     var sql = `SELECT * FROM members WHERE id = ?`;
 
     connection.query(sql, [id], function (error, results) {
@@ -316,7 +399,7 @@ app.post('/lectureinfo', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
+        else {
             console.log('강의개설이 성공적으로 되었습니다.');
             //res.send("<script>alert('회원가입이 성공적으로 되었습니다.'); location.href='/login';</script>");//성공적으로 회원가입하면 로그인으로 보낸다
             res.send("<script>alert('강의가 성공적으로 개설 되었습니다.'); location.href='/professors';</script>");
@@ -353,7 +436,7 @@ app.post('/stu_lec_info/', (req, res) => {//학생 수강신청 정보
             console.log(error);
             res.send("<script>alert('에러.'); location.href='/student';</script>");
         }
-        else{
+        else {
             console.log('수강신청이 성공적으로 되었습니다.');
             res.send("<script>alert('수강신청이 성공적으로 되었습니다.'); location.href='/student';</script>");
         }
@@ -372,7 +455,7 @@ app.post('/announcementinfo', (req, res) => {
         if (error) {
             console.log(error);
         }
-        else{
+        else {
             console.log('공지사항이 업로드 되었습니다.');
             //res.send("<script>alert('회원가입이 성공적으로 되었습니다.'); location.href='/login';</script>");//성공적으로 회원가입하면 로그인으로 보낸다
             res.send("<script>alert('공지사항이 업로드 되었습니다.'); location.href='/professors';</script>");
@@ -388,27 +471,27 @@ app.post('/editannouncementinfo', (req, res) => {
 
     //강의 테이블에 강의개설 데이터 저장
     var sql = `UPDATE announcements SET lecture_id = ?, title = ?, maintext = ?, regdate = now() WHERE idx = ?`;
-connection.query(sql, [lecture_id, title, maintext, idx], function (error, results) {
-    if (error) {
-        console.log(error);
-    }
-    else{
-        console.log('공지사항이 수정됐습니다.');
-        res.send(`<script>alert('공지사항이 수정됐습니다.'); location.href='/recent_announcements/${lecture_id}';</script>`);
-    }
-});
+    connection.query(sql, [lecture_id, title, maintext, idx], function (error, results) {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log('공지사항이 수정됐습니다.');
+            res.send(`<script>alert('공지사항이 수정됐습니다.'); location.href='/recent_announcements/${lecture_id}';</script>`);
+        }
+    });
 })
 
 // 게시물 삭제 라우트
-app.post('/delete_announcement/:lecture_id/:idx', function(req, res) {
+app.post('/delete_announcement/:lecture_id/:idx', function (req, res) {
     // 게시물 ID를 URL 매개변수에서 가져옵니다.
     var idx = req.params.idx;
     var lecture_id = req.params.lecture_id;
 
     // 데이터베이스에서 해당 ID의 게시물을 찾아 삭제합니다.
-    connection.query('DELETE FROM announcements WHERE idx = ?', [idx], function(error, results, fields) {
+    connection.query('DELETE FROM announcements WHERE idx = ?', [idx], function (error, results, fields) {
         if (error) throw error;
-    
+
         // 삭제가 완료되면, 사용자를 게시물 목록 페이지로 리다이렉트합니다.
         res.send(`<script>alert('게시물이 삭제 되었습니다.'); location.href='/recent_announcements/${lecture_id}';</script>`);
     });
@@ -417,7 +500,7 @@ app.post('/delete_announcement/:lecture_id/:idx', function(req, res) {
 
 app.get('/logout', (req, res) => {
     req.session.user = null;
-    res.send("<script>alert('로그아웃 되었습니다.'); location.href='/';</script>");
+    res.send("<script>alert('로그아웃 되었습니다.'); location.href='/login';</script>");
 });
 
 app.get('/test', (req, res) => {

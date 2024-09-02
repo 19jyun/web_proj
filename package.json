@@ -7,5 +7,15 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "mysql2": "^3.9.2"
-  }
+  },
+  "name": "web_proj",
+  "version": "1.0.0",
+  "description": "4.17 업데이트",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

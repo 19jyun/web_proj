@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Blackboard</title>
+    <link rel="stylesheet" href="/public/css/styles.css">
 </head>
+
 <body>
-    
-    <h1>Blackboard</h1>
-        
-    <% if(id){ %> <!--로그인이 되어있는 경우-->
-        환영합니다, <%= name %> 님!
-        <a href="/logout">로그아웃</a>
-    <% } else { %>
-        <li><a href="/login">로그인</a></li>
-        <li><a href="/signup">회원가입</a></li>
-    <% } %>
+    <header class="header-container">
+        <h1>Blackboard</h1>
 
-    <p>____________________________________</p>
-    
+        <% if(typeof id !=='undefined' && id){ %> <!--로그인이 되어있는 경우-->
+            <div class="welcome-message">
+                <p>환영합니다, <strong>
+                        <%= name %>님!
+                    </strong></p>
+                <a href="/logout" class="logout-button">로그아웃</a>
+            </div>
 
+            <% } %>
+
+    </header>

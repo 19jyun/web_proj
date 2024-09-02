@@ -1,21 +1,30 @@
-<%- include ('header') %>
+<%- include('header') %>
 
-<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
 
-<form action="/editannouncementinfo" method="post">
+    <div class="upload-container">
+        <h2>게시물 편집</h2>
 
-    <input type="hidden" name="lecture_id" value="<%= announcement.lecture_id %>"></input>
-    <input type="hidden" name="idx" value="<%= announcement.idx %>"></input>
+        <form action="/editannouncementinfo" method="post" class="upload-form">
+            <input type="hidden" name="lecture_id" value="<%= announcement.lecture_id %>">
+            <input type="hidden" name="idx" value="<%= announcement.idx %>">
 
-    <li>게시물 편집</li>
-        <li>제목: <input type="text" name="title" value="<%= announcement.title %>"> </input></li>
-        <li>본문: <textarea id="maintext" name="maintext"><%= announcement.maintext %></textarea></li> <!-- 수정된 부분 -->
+            <div class="form-group">
+                <label for="title">제목:</label>
+                <input type="text" id="title" name="title" value="<%= announcement.title %>">
+            </div>
 
-        <button type="submit">업데이트</button> <!--버튼 누르면 해당 lecture의 id를 가지고 함꼐 업로드 실행-->
-</form>
+            <div class="form-group">
+                <label for="maintext">본문:</label>
+                <textarea id="maintext" name="maintext"><%= announcement.maintext %></textarea>
+            </div>
 
-<script>
-    CKEDITOR.replace( 'maintext' );
-</script>
+            <button type="submit" class="submit-button">업데이트</button>
+        </form>
+    </div>
 
-<%- include ('footer') %>
+    <script>
+        CKEDITOR.replace('maintext');
+    </script>
+
+    <%- include('footer') %>

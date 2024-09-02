@@ -1,37 +1,44 @@
 <%- include('header.ejs') %>
 
-<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+    <div class="container">
+        <h1 class="lecture-code">
+            <%= lecture %>
+        </h1> <!-- 강의 코드 중앙 정렬 -->
+        <h2 class="announcement-header">최근 공지사항</h2> <!-- 최근 공지사항 중앙 정렬 -->
 
-
-    <header>
-    
-    <h1><%= lecture %></h1>
-    <h2>최근 공지사항</h2>
-        
-        <div style="overflow-y: scroll; height: 200px;">
-            <ul>
+        <div class="announcement-container">
+            <% if (announcements.length> 0) { %>
                 <% announcements.forEach(function(announcement, index) { %>
-                    <li>
-                        <strong><%= announcement.title %> - <%= announcement.regdate %></strong>
-                        <!-- Directly display rich text as HTML -->
-                        <div class="announcement-text" style="margin-top: 5px;">
+                    <div class="announcement-item">
+                        <strong class="announcement-title">
+                            <%= announcement.title %>
+                        </strong>
+                        <span class="announcement-time">
+                            <%= announcement.regdate %>
+                        </span>
+
+                        <div class="announcement-text">
                             <%- announcement.maintext %> <!-- 저장된 부분 그대로 불러오기 -->
                         </div>
 
-                        <!--편집 삭제 버튼은 학생이면 사라져야된다-->
-                        <% if (identity !== 'student') { %>
-                            <button type="submit" onclick="location.href = '/edit_announcement/' + '<%= announcement.lecture_id %>' + '/' +  '<%= announcement.idx%>' ">편집</button>
-                        <form action="/delete_announcement/<%= announcement.lecture_id %>/<%= announcement.idx%>" method="post">
-                            <button type="submit">삭제</button>
-                        </form>
-                        <% } %>
-                    </li>
-                <% }); %>
-            </ul>
+                        <!--편집 삭제 버튼은 학생이면 사라져야 된다-->
+                        <% if (identity !=='student' ) { %>
+                            <div class="button-group">
+                                <button type="button"
+                                    onclick="location.href = '/edit_announcement/' + '<%= announcement.lecture_id %>' + '/' +  '<%= announcement.idx%>'">편집</button>
+                                <form
+                                    action="/delete_announcement/<%= announcement.lecture_id %>/<%= announcement.idx%>"
+                                    method="post" style="display:inline;">
+                                    <button type="submit">삭제</button>
+                                </form>
+                            </div>
+                            <% } %>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="no-announcements">아무런 공지사항이 없습니다!</p>
+                            <% } %>
         </div>
+    </div>
 
-
-
-        
-<%- include('footer.ejs') %>
-```
+    <%- include('footer.ejs') %>
