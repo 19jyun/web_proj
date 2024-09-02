@@ -336,7 +336,6 @@ app.post('/signupinfo', (req, res) => {
     const identity = req.body.identity;
 
     bcrypt.hash(password, 10, function (err, hash) {
-        // Now store hash in your password DB.
         if (err) {
             console.error("Error hashing password:", err);
             return res.status(500).send("Error creating account.");
